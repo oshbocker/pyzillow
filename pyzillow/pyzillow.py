@@ -41,7 +41,20 @@ class ZillowWrapper(object):
             'zws-id': self.api_key
         }
         return self.get_data(url, params)
-
+        
+    def get_deep_comps(self, zpid, count, rentzestimate=False):
+        """
+        GetDeepComps API
+        """
+        url = 'http://www.zillow.com/webservice/GetDeepComps.htm'
+        params = {
+                  'zws-id': self.api_key,
+                  'zpid': zpid,
+                  'count': count,
+                  'rentzestimate': rentzestimate
+        }
+        return self.get_data(url, params)
+        
     def get_data(self, url, params):
         """
         """
@@ -133,6 +146,47 @@ class ZillowResults(object):
 
 
 class GetDeepSearchResults(ZillowResults):
+    """
+    """
+    attribute_mapping = {
+        'zillow_id': 'result/zpid',
+        'home_type': 'result/useCode',
+        'home_detail_link': 'result/links/homedetails',
+        'graph_data_link': 'result/links/graphsanddata',
+        'map_this_home_link': 'result/links/mapthishome',
+        'latitude': 'result/address/latitude',
+        'longitude': 'result/address/longitude',
+        'tax_year': 'result/taxAssessmentYear',
+        'tax_value': 'result/taxAssessment',
+        'year_built': 'result/yearBuilt',
+        'property_size': 'result/lotSizeSqFt',
+        'home_size': 'result/finishedSqFt',
+        'bathrooms': 'result/bathrooms',
+        'bedrooms': 'result/bedrooms',
+        'last_sold_date': 'result/lastSoldDate',
+        'last_sold_price': 'result/lastSoldPrice',
+        'zestimate_amount': 'result/zestimate/amount',
+        'zestimate_last_updated': 'result/zestimate/last-updated',
+        'zestimate_value_change': 'result/zestimate/valueChange',
+        'zestimate_valuation_range_high':
+        'result/zestimate/valuationRange/high',
+        'zestimate_valuationRange_low': 'result/zestimate/valuationRange/low',
+        'zestimate_percentile': 'result/zestimate/percentile',
+    }
+
+    def __init__(self, data, *args, **kwargs):
+        """
+        Creates instance of GeocoderResult from the provided XML data array
+        """
+        self.data = data.findall('response/results')[0]
+        for attr in self.attribute_mapping.__iter__():
+            try:
+                self.__setattr__(attr, self.get_attr(attr))
+            except AttributeError:
+                print ('AttributeError with %s' % attr)
+                
+                
+class GetDeepComps(ZillowResults):
     """
     """
     attribute_mapping = {
